@@ -1,0 +1,273 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="daterangepicker/datepicker/js/jquery-ui-1.7.1.custom.min.js"></script>
+<script type="text/javascript" src="daterangepicker/datepicker/js/daterangepicker.jQuery.js"></script>
+<link rel="stylesheet" href="daterangepicker/css/ui.daterangepicker.css" type="text/css" />
+<link rel="stylesheet" href="daterangepicker/css/redmond/jquery-ui-1.7.1.custom.css" type="text/css" title="ui-theme" />
+
+<body>
+<h1 align="center">此页面用来生成按日/按月分表的数据库表，请认真看清楚每一项后再填写！</h1>
+<span id="messageId" style="color: green;word-wrap:break-word;" ></span><br/><br/>
+<form action="" method="post" id="createTableFormId">
+	选择时间段：<input type="text" value="" name="saleTime" class="rangeA"/><br/><br/>
+	选择数据库：<!-- <input type="radio" name="dbName" value="item" checked="checked"/>palmplay_item库 -->&nbsp;&nbsp;&nbsp;
+	<input type="radio" name="dbName" value="log"/>palmplay_log库<br/><br/>
+	选择生成方式：<input type="radio" name="creatype" value="day" checked="checked"/>按日生成&nbsp;&nbsp;&nbsp;<input type="radio" name="creatype" value="month"/>按月生成<br/><br/>
+	模板表前缀名称:<input type="text" value="" name="tempTableName" />&nbsp;&nbsp;如:user_2014_15_23则输入user即可<br/><br/>
+	创建表sql模板：<textarea name="sqlInfo" rows="20" cols="100" class="textClass">
+	(`cpID` varchar(8) NOT NULL,
+  	`account` varchar(50) NOT NULL,
+  	`pw` varchar(16) NOT NULL,
+  	PRIMARY KEY (`cpID`)
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+	</textarea>&nbsp;&nbsp;只需要输入创建字段的sql和后面的部分，如上例<br/><br/>
+	<input type="button" class="buttonClass" value="提交生成数据表 "/>&nbsp;&nbsp;&nbsp;<span style="color: red;">请确保您的sql正确无误后再提交</span>
+</form>
+
+<div>
+<h2>需要创建的sql表模板如下</h2><br/>
+<p>
+CREATE TABLE `pv_2014_07_25` (
+  `id` varchar(40) NOT NULL,
+  `sessionID` varchar(40) DEFAULT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `imei` varchar(20) DEFAULT NULL,
+  `ua` varchar(300) DEFAULT NULL,
+  `imsi` varchar(20) DEFAULT NULL,
+  `countryCode` varchar(10) DEFAULT NULL,
+  `mccMnc` varchar(8) DEFAULT NULL,
+  `channel` varchar(50) NOT NULL,
+  `netType` varchar(30) DEFAULT NULL,
+  `systemVersionCode` int(11) DEFAULT NULL,
+  `curClientVersionCode` int(11) DEFAULT NULL,
+  `url` varchar(30) DEFAULT NULL,
+  `visiteDate` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</p>
+<p>
+CREATE TABLE `setup_2014_07` (
+  `downloadID` varchar(60) NOT NULL,
+  `itemID` varchar(40) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `category1` varchar(16) NOT NULL,
+  `category2` varchar(16) NOT NULL,
+  `category3` varchar(30) NOT NULL,
+  `sourceSize` varchar(20) NOT NULL,
+  `cpID` varchar(8) NOT NULL,
+  `cpName` varchar(100) NOT NULL,
+  `listDate` datetime NOT NULL,
+  `versionCode` int(11) DEFAULT NULL,
+  `versionName` varchar(40) DEFAULT NULL,
+  `packageName` varchar(60) DEFAULT NULL,
+  `isInSale` varchar(4) DEFAULT NULL,
+  `inSaleID` varchar(10) DEFAULT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `imei` varchar(20) DEFAULT NULL,
+  `ua` varchar(300) DEFAULT NULL,
+  `imsi` varchar(20) DEFAULT NULL,
+  `countryCode` varchar(10) DEFAULT NULL,
+  `mccMnc` varchar(8) DEFAULT NULL,
+  `channel` varchar(50) NOT NULL,
+  `systemVersionCode` int(11) DEFAULT NULL,
+  `curClientVersionCode` int(11) DEFAULT NULL,
+  `setupDate` datetime NOT NULL,
+   PRIMARY KEY (`downloadID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+</p>
+<p>
+CREATE TABLE `search_2014_07` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `searchContent` varchar(100) DEFAULT NULL,
+  `imei` varchar(20) DEFAULT NULL,
+  `countryCode` varchar(10) NOT NULL,
+  `channel` varchar(50) NOT NULL,
+  `ddate` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</p>
+<p>
+CREATE TABLE `insale_callback_2014_07` (
+  `itemID` varchar(40) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `category1` varchar(16) NOT NULL,
+  `category2` varchar(16) NOT NULL,
+  `category3` varchar(30) NOT NULL,
+  `sourceSize` varchar(20) NOT NULL,
+  `cpID` varchar(8) NOT NULL,
+  `cpName` varchar(100) NOT NULL,
+  `listDate` datetime DEFAULT NULL,
+  `versionCode` int(11) DEFAULT NULL,
+  `versionName` varchar(40) DEFAULT NULL,
+  `packageName` varchar(60) DEFAULT NULL,
+  `isInSale` varchar(4) DEFAULT NULL,
+  `inSaleID` varchar(10) DEFAULT NULL,
+  `phone` varchar(16) NOT NULL,
+  `countryCode` varchar(10) NOT NULL,
+  `RMB` float NOT NULL,
+  `USD` float NOT NULL,
+  `saleDate` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</p>
+<p>
+CREATE TABLE `download_finish_2014_07` (
+  `downloadID` varchar(60) NOT NULL,
+  `itemID` varchar(40) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `category1` varchar(16) NOT NULL,
+  `category2` varchar(16) NOT NULL,
+  `category3` varchar(30) NOT NULL,
+  `sourceSize` varchar(30) NOT NULL,
+  `cpID` varchar(8) NOT NULL,
+  `cpName` varchar(100) NOT NULL,
+  `listDate` date NOT NULL,
+  `versionCode` int(11) DEFAULT NULL,
+  `versionName` varchar(40) DEFAULT NULL,
+  `packageName` varchar(60) DEFAULT NULL,
+  `isInSale` varchar(4) DEFAULT NULL,
+  `inSaleID` varchar(10) DEFAULT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `imei` varchar(20) DEFAULT NULL,
+  `ua` varchar(300) DEFAULT NULL,
+  `imsi` varchar(20) DEFAULT NULL,
+  `countryCode` varchar(10) DEFAULT NULL,
+  `mccMnc` varchar(8) DEFAULT NULL,
+  `netType` varchar(20) DEFAULT NULL,
+  `channel` varchar(50) NOT NULL,
+  `systemVersionCode` int(11) DEFAULT NULL,
+  `curClientVersionCode` int(11) DEFAULT NULL,
+  `status` int(11) NOT NULL,
+  `finishDate` datetime NOT NULL,
+  `fromPage` varchar(30) NOT NULL,
+  `continueDownCount` int(11) NOT NULL,
+  PRIMARY KEY (`downloadID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+</p>
+<p>
+CREATE TABLE `download_click_2014_07` (
+  `downloadID` varchar(60) NOT NULL,
+  `itemID` varchar(40) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `category1` varchar(30) NOT NULL,
+  `category2` varchar(30) NOT NULL,
+  `category3` varchar(50) NOT NULL,
+  `sourceSize` varchar(30) NOT NULL,
+  `cpID` varchar(8) NOT NULL,
+  `cpName` varchar(100) NOT NULL,
+  `listDate` datetime NOT NULL,
+  `versionCode` int(11) DEFAULT NULL,
+  `versionName` varchar(40) DEFAULT NULL,
+  `packageName` varchar(60) DEFAULT NULL,
+  `isInSale` varchar(4) DEFAULT NULL,
+  `inSaleID` varchar(10) DEFAULT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `imei` varchar(20) DEFAULT NULL,
+  `ua` varchar(300) DEFAULT NULL,
+  `imsi` varchar(20) DEFAULT NULL,
+  `countryCode` varchar(10) DEFAULT NULL,
+  `mccMnc` varchar(8) DEFAULT NULL,
+  `netType` varchar(20) DEFAULT NULL,
+  `channel` varchar(30) NOT NULL,
+  `systemVersionCode` int(11) DEFAULT NULL,
+  `curClientVersionCode` int(11) DEFAULT NULL,
+  `status` int(11) NOT NULL,
+  `fromPage` varchar(30) NOT NULL,
+  `continueDownCount` int(11) NOT NULL,
+  `clickDate` datetime NOT NULL,
+  `isSetup` varchar(4) NOT NULL DEFAULT 'F',
+  PRIMARY KEY (`downloadID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</p>
+<p>
+CREATE TABLE `mid_download_item_2014_07` (
+  `itemID` varchar(40) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `category1` varchar(16) NOT NULL,
+  `category2` varchar(16) NOT NULL,
+  `category3` varchar(30) NOT NULL,
+  `sourceSize` varchar(20) NOT NULL,
+  `cpID` varchar(8) NOT NULL,
+  `cpName` varchar(100) NOT NULL,
+  `versionCode` int(11) DEFAULT NULL,
+  `versionName` varchar(40) DEFAULT NULL,
+  `packageName` varchar(60) DEFAULT NULL,
+  `countryCode` varchar(10) NOT NULL,
+  `mccMnc` varchar(8) NOT NULL,
+  `channel` varchar(50) NOT NULL,
+  `saleCount` int(11) NOT NULL,
+  `downloadCount` int(11) NOT NULL,
+  `RMB` float NOT NULL,
+  `USD` float NOT NULL,
+  `ddate` datetime NOT NULL,
+  PRIMARY KEY (`itemID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</p>
+<p>
+CREATE TABLE `user_login_2014_07` (
+  `id` varchar(40) NOT NULL,
+  `uid` bigint(20) NOT NULL,
+  `imei` varchar(20) NOT NULL DEFAULT '',
+  `ua` varchar(300) NOT NULL,
+  `imsi` varchar(20) DEFAULT NULL,
+  `countryCode` varchar(10) NOT NULL,
+  `mccMnc` varchar(8) DEFAULT NULL,
+  `channel` varchar(50) NOT NULL,
+  `systemVersionCode` int(11) NOT NULL,
+  `curClientVersionCode` int(11) NOT NULL,
+  `loginDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</p>
+
+</div>
+</body>
+<script type="text/javascript">
+$(document).ready(function(){
+		// $('.rangeA').daterangepicker({arrows:false});
+		 
+		 $('.rangeA').daterangepicker({
+             presetRanges:[
+                 //{text:'最近一周', dateStart:'yesterday-7days', dateEnd:'yesterday' },
+                 //{text:'最近一月', dateStart:'yesterday-1month', dateEnd:'yesterday' },
+                 //{text:'最近一年', dateStart:'yesterday-1year', dateEnd:'yesterday' }
+             ],
+             presets:{
+                 dateRange:'自定义时间'
+             },
+             rangeStartTitle:'起始日期',
+             rangeEndTitle:'结束日期',
+             nextLinkText:'下月',
+             prevLinkText:'上月',
+             doneButtonText:'确定',
+             cancelButtonText:'取消',
+             earliestDate:'',
+             latestDate:Date.parse('today'),
+             constrainDates:true,
+             rangeSplitter:'--',
+             dateFormat:'yy-mm-dd',
+             closeOnSelect:false,
+             onOpen:function(){
+                 $('.ui-daterangepicker-dateRange').click().parent().hide();
+             }
+		});
+ 
+		 $(".buttonClass").click(function(){
+			 $.ajax({
+				url:"createTable/dowork",
+				type:"post",
+				data:$("#createTableFormId").serialize(),
+				success:function(data) {
+					$("#messageId").text("成功创建表"+data);
+				},
+				error:function(data,response) {
+					$("#messageId").text("error：发生异常");
+				}
+			 });
+		 });
+});
+</script>
+
+</html>

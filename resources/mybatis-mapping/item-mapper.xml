@@ -1,0 +1,609 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afmobi.mapper.manager.ItemMapper">
+
+	<select id="getCatesList" resultType="map">
+		select
+		category3 as id,name
+		from
+		category3
+		where
+		category2=#{cate2Id}
+	</select>
+
+	<select id="getItemListCount" parameterType="map" resultType="int">
+		<choose>
+			<when test="map.Soft != null">
+				select
+				count(*) as sum
+				from
+				item i left join item_soft s on i.itemID = s.itemID
+				left join category3 cate3 on i.category3=cate3.category3
+				<if test="map.countryCode != null and map.countryCode != ''">
+					right join ${map.countryCode} t on i.itemID=t.itemID
+				</if>
+			</when>
+			<otherwise>
+				select
+				count(*) as sum
+				from
+				item i left join category3 cate3 on i.category3=cate3.category3
+				<if test="map.countryCode != null and map.countryCode != '' ">
+					right join ${map.countryCode} t on i.itemID=t.itemID
+				</if>
+			</otherwise>
+		</choose>
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="map.itemID != null and map.itemID != '' ">
+				and i.itemID = #{map.itemID}
+			</if>
+			<if test="map.status != null and map.status == 'LIST' ">
+				and i.status = 'LIST'
+			</if>
+			<if test="map.status != null and map.status != 'LIST' ">
+				and i.status != 'LIST'
+			</if>
+			<if test="map.name != null and map.name != '' ">
+				and i.name like #{map.name}"%"
+			</if>
+			<if test="map.category1 != null and map.category1 != '' ">
+				and i.category1 = #{map.category1} 
+			</if>
+			<if test="map.category2 != null and map.category2 != '' ">
+				and i.category2 = #{map.category2}
+			</if>
+			<if test="map.category3 != null and map.category3 != '' ">
+				and i.category3 = #{map.category3}
+			</if>
+			<if test="map.beginTime != null and map.beginTime != '' ">
+				and i.createDate <![CDATA[>=]]>
+				#{map.beginTime}
+			</if>
+			<if test="map.endTime != null and map.endTime != '' ">
+				and i.createDate <![CDATA[<]]>
+				#{map.endTime}
+			</if>
+		</trim>
+	</select>
+
+	<select id="getItemList" resultType="com.afmobi.model.manager.ItemVo">
+		<choose>
+			<when test="map.Soft != null">
+				select
+				i.itemID,i.name,i.iconID,i.category1,i.category2,i.category3,i.status,s.versionCode,s.versionName,s.packageName,cate3.name
+				as cate3Name,itemCountry.country,i.createDate,i.listDate
+				from
+				item i left join item_soft s on i.itemID = s.itemID
+				left join item_country itemCountry on i.itemID = itemCountry.itemID
+				left join category3 cate3 on i.category3=cate3.category3
+				<if test="map.countryCode != null and map.countryCode != '' ">
+					right join ${map.countryCode} t on i.itemID=t.itemID
+				</if>
+			</when>
+			<otherwise>
+				select
+				i.itemID,i.name,i.iconID,i.category2,i.category3,i.status,cate3.name
+				as cate3Name,itemCountry.country
+				from 
+				 item i left join item_country itemCountry on i.itemID = itemCountry.itemID 
+				 left join category3 cate3 on i.category3=cate3.category3
+				<if test="map.countryCode != null and map.countryCode != '' ">
+					right join ${map.countryCode} t on i.itemID=t.itemID
+				</if>
+			</otherwise>
+		</choose>
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="map.itemID != null and map.itemID != '' ">
+				and i.itemID = #{map.itemID}
+			</if>
+			<if test="map.status != null and map.status == 'LIST' ">
+				and i.status = 'LIST'
+			</if>
+			<if test="map.status != null and map.status != 'LIST' ">
+				and i.status != 'LIST'
+			</if>
+			<if test="map.name != null and map.name != '' ">
+				and i.name like #{map.name}"%"
+			</if>
+			<if test="map.category1 != null and map.category1 != '' ">
+				and i.category1 = #{map.category1} 
+			</if>
+			<if test="map.category2 != null and map.category2 != '' ">
+				and i.category2 = #{map.category2}
+			</if>
+			<if test="map.category3 != null and map.category3 != '' ">
+				and i.category3 = #{map.category3}
+			</if>
+			<if test="map.beginTime != null and map.beginTime != '' ">
+				and i.createDate <![CDATA[>=]]>
+				#{map.beginTime}
+			</if>
+			<if test="map.endTime != null and map.endTime != '' ">
+				and i.createDate <![CDATA[<]]>
+				#{map.endTime}
+			</if>
+		</trim>
+		<if test="map.status != null and map.status != 'LIST' ">
+			order by i.createDate desc 
+		</if>
+		<if test="map.status != null and map.status == 'LIST' ">
+			order by i.listDate desc  
+		</if>
+		limit #{map.start},#{map.end}
+	</select>
+
+
+	<select id="getTagList" resultType="map">
+		select
+		tagID as id,name
+		from
+		tag
+		where
+		category3=#{cate3Id}
+	</select>
+
+	<select id="getSoftCountBySaleId" resultType="int">
+		select
+		count(itemId) as sum
+		from
+		item_soft
+		where
+		inSaleID = #{inSaleID}
+	</select>
+
+	<select id="checkSoftPackageName" resultType="map">
+		select
+			i.itemID,s.versionCode,i.status 
+		from
+			item i,item_soft s
+		where
+			i.itemID=s.itemID and packageName = #{packageName}
+	</select>
+	
+	<select id="getSoftVersionCodeByItemId" resultType="map">
+		select
+			versionCode,packageName 
+		from
+			item_soft
+		where
+			itemID = #{itemID}
+	</select>
+
+	<insert id="saveItem" parameterType="com.afmobi.model.manager.Item">
+		<![CDATA[
+			insert into 
+				item(itemID,name,itemNum,category1,category2,category3,iconID,iconSID,sourceID,
+				sourceSize,cpID,des,advBannerID,advIconID,createDate,listDate,status)  
+			values
+				(#{item.itemID},#{item.name},#{item.itemNum},#{item.category1},#{item.category2},
+				#{item.category3},#{item.iconID},#{item.iconSID},#{item.sourceID},
+				#{item.sourceSize},#{item.cpID},#{item.des},#{item.advBannerID},
+				#{item.advIconID},now(),now(),#{item.status})
+			]]>
+	</insert>
+
+	<insert id="saveSoft" parameterType="com.afmobi.model.manager.SoftItem">
+		<![CDATA[
+			insert into
+				item_soft(itemID,versionCode,versionName,packageName,lan,
+				img0,img1,img2,img3,img4,isInSale,inSaleID,isLineUpdate)
+			values
+				(#{soft.itemID},#{soft.versionCode},#{soft.versionName},
+				#{soft.packageName},#{soft.lan},#{soft.img0},#{soft.img1},#{soft.img2},
+				#{soft.img3},#{soft.img4},#{soft.isInSale},#{soft.inSaleID},#{soft.isLineUpdate})
+			]]>
+	</insert>
+
+	<insert id="saveVideo" parameterType="com.afmobi.model.manager.VideoItem">
+		<![CDATA[
+			insert into
+				item_video(itemID,img0,img1,img2,img3,img4,shortVideoID,
+				publicYear,actor,director,publicCountry,lan)
+			values
+				(#{video.itemID},#{video.img0},#{video.img1},#{video.img2},#{video.img3},
+				#{video.img4},#{video.shortVideoID},#{video.publicYear},
+				#{video.actor},#{video.director},#{video.publicCountry},#{video.lan})
+			]]>
+	</insert>
+
+	<insert id="saveMusic" parameterType="com.afmobi.model.manager.MusicItem">
+		<![CDATA[
+			insert into
+				item_music(itemID,publicYear,singer,publicCountry,lan)
+			values
+				(#{music.itemID},#{music.publicYear},#{music.singer},#{music.publicCountry},#{music.lan})
+			]]>
+	</insert>
+
+	<insert id="saveItemCountry">
+	<![CDATA[
+		insert into
+			item_country(itemID,country)
+		values
+			(#{itemID},#{countrys})
+		]]>
+	</insert>
+
+	<insert id="saveItemCountrySplit">
+	<![CDATA[
+		insert into
+			${itemCountryTable}
+		values
+			(#{itemID})
+		]]>
+	</insert>
+
+	<insert id="saveItemTag">
+	<![CDATA[
+		insert into
+			item_tag(itemID,tagID)
+		values
+			(#{itemID},#{tagID})
+		]]>
+	</insert>
+
+	<insert id="saveItemSearch">
+	<![CDATA[
+		insert into
+			${itemSearchTable}(term,itemID)
+		values
+			(#{term},#{itemID})
+		]]>
+	</insert>
+
+	<insert id="saveItemStatics">
+		<![CDATA[
+			insert into
+				item_statics(itemNum,downloadCount,star,allStar,starUserCount,commentCount)
+			values
+				(#{itemNum},0,#{star},0,0,0)
+		]]>
+	</insert>
+	
+	<update id="updateItemStatics">
+		<![CDATA[
+			update 
+				item_statics
+			set 
+			
+				star=#{star}
+			where 
+				itemNum = #{itemNum}
+		]]>
+	</update>
+
+	<delete id="deleteItem">
+		delete from item where itemID=#{itemID}
+	</delete>
+
+	<delete id="deleteItemTable">
+		delete from ${itemTable} where itemID=#{itemID}
+	</delete>
+
+	<delete id="deleteItemCountry">
+		delete from item_country where itemID=#{itemID}
+	</delete>
+
+	<delete id="deleteItemTag">
+		delete from item_tag where itemID=#{itemID}
+	</delete>
+
+
+	<update id="updateBatchItemStatus">
+		UPDATE item SET status=#{status},listDate = now() WHERE itemID IN 
+		<foreach collection="itemIdArr" index="index" item="itemID" open="(" separator="," close=")"> 
+			#{itemID} 
+		</foreach>
+	</update>
+	
+	<select id="getItemByItemID" resultType="com.afmobi.model.manager.Item">
+		select 
+			i.itemID,i.name,i.category1,i.category2,i.category3,i.iconID,i.iconSID,
+			i.sourceID,i.sourceSize,i.cpID,i.des,i.advBannerID,i.advIconID,i.status,c.country as countryCodes
+		from 
+			item i left join item_country c
+		on 
+			i.itemID = c.itemID 
+		where 
+			i.itemID = #{itemID}
+	</select>
+	
+	<select id="getSoftByItemID" resultType="com.afmobi.model.manager.SoftItem">
+		select 
+			itemID,versionCode,versionName,packageName,lan,
+			img0,img1,img2,img3,img4,isInSale,inSaleID,isLineUpdate
+		from 
+			item_soft 
+		where 
+			itemID = #{itemID}
+	</select>
+	
+	<select id="getVideoByItemID" resultType="com.afmobi.model.manager.VideoItem">
+		select 
+			itemID,img0,img1,img2,img3,img4,shortVideoID,publicYear,
+			director,actor,publicCountry,lan
+		from 
+			item_video 
+		where 
+			itemID = #{itemID}
+	</select>
+	
+	<select id="getDigitalByItemID" resultType="com.afmobi.model.manager.MusicItem">
+		select 
+			itemID,publicYear,singer,publicCountry,lan
+		from 
+			item_music 
+		where 
+			itemID = #{itemID}
+	</select>
+	
+	<select id="getTagsByItemId" resultType="map">
+		select 
+			tagID
+		from 
+			item_tag 
+		where 
+			itemID = #{itemID}
+	</select>
+	
+	<select id="getItemStaticsByItemNum" resultType="map">
+		select 
+			itemNum,downloadCount,star,allStar,starUserCount,commentCount
+		from 
+			item_statics 
+		where 
+			itemNum = #{itemNum}
+	</select>
+	
+	<update id="updateItemCountry">
+		update  
+			item_country 
+		set 
+			country = #{countryCodes} 
+		where
+			itemID = #{itemID}
+	</update>
+	
+	<update id="updateItem">
+		update  
+			item 
+		set 
+			name=#{item.name},category1=#{item.category1},category2=#{item.category2},category3=#{item.category3},iconID=#{item.iconID},
+			iconSID=#{item.iconSID},sourceID=#{item.sourceID},sourceSize=#{item.sourceSize},cpID=#{item.cpID},status=#{item.status},
+			des=#{item.des},advBannerID=#{item.advBannerID},advIconID=#{item.advIconID}
+		where 
+			itemID = #{item.itemID} 
+	</update>
+	
+	<update id="updateSoft">
+		update  
+			item_soft 
+		set 
+			versionCode = #{soft.versionCode},versionName = #{soft.versionName},packageName = #{soft.packageName},
+			lan = #{soft.lan},img0 = #{soft.img0},img1 = #{soft.img1},img2 = #{soft.img2},img3 = #{soft.img3},
+			img4 = #{soft.img4},isLineUpdate = #{soft.isLineUpdate}
+		where 
+			itemID = #{soft.itemID} 
+	</update>
+	
+	<update id="updateVideo">
+		update  
+			item_video 
+		set 
+			img0 = #{video.img0},img1 = #{video.img1},img2 = #{video.img2},img3 = #{video.img3},img4 = #{video.img4},shortVideoID = #{video.shortVideoID},
+			publicYear = #{video.publicYear},actor = #{video.actor},director = #{video.actor},publicCountry = #{video.publicCountry},lan = #{video.lan}
+		where 
+			itemID = #{video.itemID} 
+	</update>
+	
+	<update id="updateMusic">
+		update  
+			item_music 
+		set 
+			publicYear=#{music.publicYear},singer=#{music.singer},publicCountry=#{music.publicCountry},lan=#{music.lan}
+		where 
+			itemID = #{music.itemID} 
+	</update>
+	
+	<select id="getItemCountByItemId" resultType="int">
+		select count(itemID) as sum from item where itemID=#{itemID}
+	</select>
+	
+	<select id="getItemCountryCode" resultType="java.lang.String">
+		select country from item_country where itemID=#{itemID} limit 1
+	</select>
+		
+	<delete id="deleteCpItemCheck">
+		delete from cp_item_check where itemID=#{itemID}
+	</delete>
+	
+	<update id="updateItemId">
+		update  
+			${tableName} 
+		set 
+			itemID=#{listItemId} 
+		where 
+			itemID = #{itemID} 
+	</update>
+	
+	<select id="getItemGateGory2" resultType="java.lang.String">
+		select category2 from item where itemID=#{itemID} limit 1
+	</select>
+	
+	<update id="updateStatus">
+		update  
+			item  
+		set 
+			status=#{status}
+		where 
+			itemID = #{itemID} 
+	</update>
+	
+	<select id="itemListByids" resultType="map">
+		select 
+			i.itemID,i.name,i.iconID,s.versionCode,cate3.name as cate3Name 
+		from
+			item i left join item_soft s on i.itemID = s.itemID 
+			left join category3 cate3 on i.category3=cate3.category3 
+		where i.status='LIST' and i.itemID in 
+		<foreach item="itemId" index="index" collection="array" open="(" separator="," close=")">
+			#{itemId}
+		</foreach>
+	</select>
+	
+	<select id="itemListByName" resultType="map">
+		select 
+			i.itemID,i.name,i.iconID
+		from
+			item i 
+		where 
+			i.status='LIST' and (i.category2 = #{category2} or i.category1 = #{category2}) and i.name like #{name}"%"
+	</select>
+	
+	<select id="itemCountryListByItemIDs" resultType="map">
+		select 
+			itemID,country
+		from
+			item_country
+		where itemID in 
+		<foreach item="itemId" index="index" collection="array" open="(" separator="," close=")">
+			#{itemId}
+		</foreach>
+	</select>
+	
+	<delete id="batchDeleteItemCountryCode">
+		delete from item_country_${code} where itemID in 
+		<foreach item="itemID" index="index" collection="list" open="(" separator="," close=")">
+			#{itemID}
+		</foreach>
+	</delete>
+	
+	<select id="itemListByNameOrId" resultType="map">
+		select 
+			i.itemID,i.name,i.iconID
+		from
+			item i 
+		where 
+			i.status='LIST' and (i.itemID=#{name} or i.name like #{name}"%")
+	</select>
+	
+	<select id="getItemPackageByItemID" resultType="map">
+		select 
+			i.itemID,s.versionCode
+		from 
+			item i,item_soft s 
+		where 
+			i.itemID=s.itemID and i.status=#{status}  and  
+			s.packageName = (select packageName from item_soft where itemID=#{itemID}) limit 1
+	</select>
+	
+	<delete id="deleteBatchItemStatics">
+		delete from item_statics where itemNum in 
+		<foreach item="itemNum" index="index" collection="array" open="(" separator="," close=")">
+			#{itemNum}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteOfflineByItemID">
+		delete from item_offline where itemID in 
+		<foreach item="itemID" index="index" collection="array" open="(" separator="," close=")">
+			#{itemID}
+		</foreach>
+	</delete>
+	
+	<select id="getItemNumByPackageName" resultType="java.lang.String">
+		select itemNum from item where itemID = (select itemID from item_soft where packageName=#{packageName} limit 1 )		
+	</select>
+	
+	<select id="getitemNumsByitemId" resultType="String">
+		select itemNum from item where itemNum = (select itemNum from item where itemID=#{itemID})
+	</select>
+	
+	<select id="getoffLineItemList" resultType="map">
+		select 
+			de.id,de.itemID,de.rank,de.sortV,de.price,de.ddate,
+			de.name,de.iconID,de.versionCode,gr.name as category3
+		from
+			(
+				select 
+					of.id,of.itemID,of.rank,of.sortV,of.price,of.ddate,i.name,i.iconID,i.category3,s.versionCode 
+				from 
+					item_offline of left join item i on of.itemID=i.itemID 
+					left join item_soft s on of.itemID=s.itemID 
+				where 
+					of.rank = #{map.rank} and i.status=#{map.status}
+					<if test="map.itemID != null and map.itemID != '' ">
+						and of.itemID=#{map.itemID}
+					</if>
+					<if test="map.name != null and map.name != '' ">
+						and i.name=#{map.name}
+					</if>
+					<if test="map.beginTime != null and map.beginTime != '' ">
+							and of.ddate <![CDATA[>=]]>#{map.beginTime}
+					</if>
+					<if test="map.endTime != null and map.endTime != '' ">
+						and of.ddate <![CDATA[<]]>#{map.endTime}
+					</if>
+			) de
+ 		left join 
+ 			category3 gr on de.category3=gr.category3 
+ 		order by de.sortV ASC,de.ddate desc limit #{map.start},#{map.end}
+	</select>
+	
+	<select id="getoffLineItemCounts" resultType="int">
+		select 
+			count(de.id)
+		from
+			(
+				select 
+					of.itemID,of.rank,of.id,of.sortV,of.price,i.name,of.ddate,i.category3,s.versionCode 
+				from 
+					item_offline of left join item i on of.itemID=i.itemID 
+					left join item_soft s on of.itemID=s.itemID 
+				where 
+					of.rank = #{map.rank} and i.status=#{map.status}
+					<if test="map.itemID != null and map.itemID != '' ">
+						and of.itemID=#{map.itemID}
+					</if>
+					<if test="map.name != null and map.name != '' ">
+						and i.name=#{map.name}
+					</if>
+					<if test="map.beginTime != null and map.beginTime != '' ">
+							and of.ddate <![CDATA[>=]]>#{map.beginTime}
+					</if>
+					<if test="map.endTime != null and map.endTime != '' ">
+						and of.ddate <![CDATA[<]]>#{map.endTime}
+					</if>
+			) de
+ 		left join 
+ 			category3 gr on de.category3=gr.category3 
+	</select>
+	
+	<delete id="deleteBatchOfLine">
+		delete from item_offline where id in
+		<foreach collection="idArr" index="index" item="id" open="(" separator="," close=")"> 
+			#{id}
+		</foreach>
+	</delete>
+	
+	<update id="updateOfLineSortVAndPrice">
+		update item_offline set sortV = #{sortV},price = #{price} where id = #{id}
+	</update>
+	
+	<select id="getOfLineItemIdListByRank" resultType="map">
+		select itemID from item_offline where rank = #{rank}
+	</select>
+	
+	<update id="updateOfLineByItemIdAndRank">
+		update item_offline set deviceType = #{deviceType} where rank = #{rank} and itemID = #{itemId}
+	</update>
+	
+	<insert id="saveOfLine">
+		insert into 
+			item_offline(rank,itemID,sortV,price,deviceType,ddate)
+		values(
+			#{rank},#{itemId},1,0,#{deviceType},now()
+		)
+	</insert>
+			
+</mapper>

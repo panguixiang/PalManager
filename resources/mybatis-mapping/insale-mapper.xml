@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afmobi.mapper.manager.InsaleMapper">
+
+	<select id="getInsalePackageList" resultType="map">
+		select inSalePackageID from in_sale_package 
+		<if test="end!=null">
+			limit #{start},#{end}
+		</if>
+	</select>
+	
+	<select id="getInsalePackageCount" resultType="int">
+		select count(inSalePackageID) from in_sale_package
+	</select>
+	
+	<select id="cpInsaleList" resultType="map">
+		select 
+			c.cpID,c.name,c.inSalePool,sCp.inSalePackageID 
+		from (
+			select cpID,name,inSalePool,concat(cpID,inSalePool) as cpInSaleCode from cp 
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="cpName != null and cpName != '' ">
+				name like #{cpName}"%"
+			</if>
+		</trim>
+			) c 
+			left join sale_package_cp_in_sale sCp 
+  		on 
+  			c.cpInSaleCode = sCp.cpInSaleCode where 
+  			<if test="inSalePool!=''">
+				sCp.inSalePackageID is null
+			</if>
+			<if test="inSalePool==''">
+				sCp.inSalePackageID<![CDATA[>]]>0
+			</if>
+  			 limit #{start},#{end} 
+	</select>
+	
+	<select id="cpInsaleCount" resultType="int">
+	select 
+			count(c.cpID) 
+		from (
+			select cpID,concat(cpID,inSalePool) as cpInSaleCode from cp 
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="cpName != null and cpName != '' ">
+				name like #{cpName}"%"
+			</if>
+		</trim>
+			) c 
+			left join sale_package_cp_in_sale sCp 
+  		on 
+  			c.cpInSaleCode = sCp.cpInSaleCode where 
+  			<if test="inSalePool!=''">
+				sCp.inSalePackageID is null
+			</if>
+			<if test="inSalePool==''">
+				sCp.inSalePackageID<![CDATA[>]]>0
+			</if>
+	</select>
+	
+	
+	<insert id="saveInSalePackage">
+		insert into in_sale_package() values()
+	</insert>
+	
+	
+  
+	<select id="inSaleInfoList" resultType="map">
+		select 
+			id,inSalePackageID,mccMnc,port,cmd,price,unit,rateRMB,rateUSD 
+		from 
+			in_sale_info 
+		where
+			inSalePackageID = #{inSalePackageID} order by ddate desc 
+		limit 
+			#{start},#{end}
+	</select>
+	
+	<select id="inSaleInfoCount" resultType="int">
+		select count(id) from in_sale_info where inSalePackageID = #{inSalePackageID}
+	</select>
+	
+	<insert id="saveInSaleInfo">
+		insert into 
+			in_sale_info(inSalePackageID,mccMnc,port,cmd,price,unit,rateRMB,rateUSD,ddate)
+		values(
+			#{inSalePackageID},#{mccMnc},#{port},#{cmd},#{price},#{unit},#{rateRMB},#{rateUSD},now()
+		)
+	</insert>
+	
+	<update id="updateInSaleInfo">
+		update 
+			in_sale_info
+		set
+			mccMnc = #{mccMnc},port = #{port},cmd = #{cmd},
+			price = #{price},unit = #{unit},rateRMB = #{rateRMB},
+			rateUSD = #{rateUSD}
+		where 
+			id = #{id}
+	</update>
+	
+	<insert id="addCpInsalePackage">
+		insert into sale_package_cp_in_sale(inSalePackageID,cpInSaleCode) values(#{pakcageId},#{cpInSaleCode})
+	</insert>
+	
+	<select id="getinSalePackageCpInsaleCodeId" resultType="Integer">
+		select id from sale_package_cp_in_sale where cpInSaleCode = #{cpInSaleCode}
+	</select>
+	
+	<update id="updateCpInsalePackage">
+		update
+			sale_package_cp_in_sale
+		set
+			inSalePackageID = #{inSalePackageID}
+		where
+			id = #{id}
+	</update>
+
+
+	<select id="cpItemInSaleList" resultType="map">
+		select 
+			it.name,it.inSaleID,pa.inSalePackageID,pa.id
+		from (
+			select 
+				i.itemID,i.name,s.inSaleID 
+			from 
+				item i right join item_soft s 
+			on 
+				i.itemID=s.itemID where s.isInSale='T' 
+				<if test="itemName!=null and itemName!=''">
+					and i.name like #{itemName}"%"
+				</if>
+				) it 
+		left join 
+			sale_package_cp_in_sale pa 
+		on 
+			it.inSaleID=pa.cpInSaleCode
+		where
+			substr(pa.cpInSaleCode,1,4) =#{cpID} 
+		limit #{start},#{end}	
+	</select>
+	
+	<select id="cpItemInSaleCount" resultType="int">
+		select 
+			count(*) 
+		from (
+			select 
+				s.inSaleID 
+			from 
+				item i right join item_soft s 
+			on 
+				i.itemID=s.itemID where s.isInSale='T' 
+				<if test="itemName!=null and itemName!=''">
+					and i.name like #{itemName}"%"
+				</if>
+				) it 
+		left join 
+			sale_package_cp_in_sale pa 
+		on 
+			it.inSaleID=pa.cpInSaleCode
+		where
+			substr(pa.cpInSaleCode,1,4) =#{cpID}
+	</select>
+	
+</mapper>

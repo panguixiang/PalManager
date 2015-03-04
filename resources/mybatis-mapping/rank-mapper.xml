@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afmobi.mapper.manager.RankMapper">
+
+	<select id="getRankCountByType" resultType="int">
+		select 
+			count(rankID) 
+		from 
+			rank 
+		where 
+			rankType=#{type}
+	</select>
+
+	<select id="getRankListByType" resultType="map">
+		select 
+			rankID,name,rankType,sortV,rule,category1,category2,adJson0,adJson1,adJson2,adJson3,adJson4 
+		from 
+			rank 
+		where 
+			rankType=#{type} 
+		 order by rankID,sortV limit #{start},#{end}
+	</select>
+	
+	<select id="getRankByRankId" resultType="map">
+		select 
+			rankID,name,rankType,sortV,rule,category1,category2,adJson0,adJson1,adJson2,adJson3,adJson4 
+		from 
+			rank 
+		where 
+			rankID=#{rankID} 
+	</select>
+	
+	<insert id="addRank">
+		insert into 
+			rank(name,rankType,sortV,rule,category1,category2,ddate) 
+		values
+			(#{name},#{rankType},1,#{rule},#{category1},#{category2},now())
+	</insert>
+	
+	<update id="updateRank">
+		update 
+			rank 
+		set 
+			name=#{name},rule=#{rule}
+		where 
+			rankID=#{rankID} 
+	</update>
+		
+	<delete id="deleteRank">
+		delete from rank where rankID = #{rankID}
+	</delete>
+	
+	<select id="feautureList" resultType="map">
+		select 
+			featureType,itemID0,itemID1,itemID2,itemID3,itemID4
+		from 
+			item_feature_rank
+		<if test="itemID!=null and itemID!=''">
+		where
+			itemID0=#{itemID} or itemID1=#{itemID} or itemID2=#{itemID} or itemID3=#{itemID} or itemID4=#{itemID}
+		</if>
+	</select>
+	
+	<update id="updateFeauture">
+		update 
+			item_feature_rank
+		set
+			${field}=#{newItemId}
+		where
+			featureType = #{feautype}
+	</update>
+
+	<select id="collectionList" resultType="map">
+		select 
+			colID,name,des,iconID,sortV,category1 
+		from 
+			collection 
+		 order by sortV,ddate limit #{start},#{end}
+	</select>
+	
+	<select id="collectionCount" resultType="int">
+		select 
+			count(colID) 
+		from 
+			collection 
+	</select>
+	
+	<insert id="addCollection">
+		insert into
+			collection(name,des,iconID,sortV,category1,category2,ddate)
+		values
+			(#{name},#{des},#{iconID},1,#{category1},#{category2},now())	
+	</insert>
+	
+	<select id="initUpdateCollection" resultType="map">
+		select 
+			colID,name,des,iconID,sortV,category1,category2  
+		from 
+			collection 
+		where 
+			colID=#{colId} limit 1
+	</select>
+	
+	<update id="updateCollection">
+			update
+				collection
+			set
+				name=#{name},des=#{des},iconID=#{iconID},category1=#{category1},category2=#{category2}
+			where
+				colID = #{colId}	
+	</update>
+	
+	<delete id="deleteCollByID">
+		delete from collection where colID = #{colId}
+	</delete>
+	
+	<update id="updateSortV">
+			update 
+				${tableName}  
+			set 
+				sortV=#{sortV} 
+			where 
+				${key} = #{colId} 
+	</update>
+	
+	<select id="getItemIdFromItemHomeRankByRankId" resultType="java.lang.String">
+		select itemID from item_home_rank where rankID = #{rankID}
+	</select>
+	
+	<select id="homeRankItemCount" resultType="int">
+		select 
+		  count(*)
+		from ( 
+			select 
+			  i.itemID,i.name,i.iconID,i.category2,i.category3,r.sortV,r.rankID,r.id 
+			from  
+			  item_home_rank r,item i where r.itemID=i.itemID and i.status='LIST' and r.rankID=#{map.rankID} 
+			  <if test="map.itemID!=null and map.itemID!=''">
+			  	and i.itemID = #{map.itemID} 
+			  </if>  
+			  <if test="map.itemName!=null and map.itemName!=''">
+			  	and i.name like #{map.itemName}"%"
+			  </if>
+			  <if test="map.category1!=null and map.category1!=''">
+			  	and i.category1 = #{map.category1} 
+			  </if>
+			  <if test="map.category2!=null and map.category2!=''">
+			  	and i.category2 = #{map.category2} 
+			  </if>  
+		  ) zh 
+		 left join item_soft s on zh.itemID = s.itemID 
+		 left join category3 cate3 on zh.category3=cate3.category3 
+	</select>
+	
+	<select id="homeRankItemList" resultType="map">
+		select 
+		  zh.itemID, zh.name, zh.iconID, zh.category2, zh.category3, zh.sortV, zh.rankID, zh.id,s.versionCode,cate3.name as cate3Name 
+		from ( 
+			select 
+			  i.itemID,i.name,i.iconID,i.category2,i.category3,r.sortV,r.rankID,r.id 
+			from  
+			  item_home_rank r,item i where r.itemID=i.itemID and i.status='LIST' and r.rankID=#{map.rankID} 
+			   <if test="map.itemID!=null and map.itemID!=''">
+			  	and i.itemID = #{map.itemID} 
+			  </if>  
+			  <if test="map.itemName!=null and map.itemName!=''">
+			  	and i.name like #{map.itemName}"%"
+			  </if>
+			  <if test="map.category1!=null and map.category1!=''">
+			  	and i.category1 = #{map.category1} 
+			  </if>
+			  <if test="map.category2!=null and map.category2!=''">
+			  	and i.category2 = #{map.category2} 
+			  </if>  
+		  ) zh 
+		 left join item_soft s on zh.itemID = s.itemID 
+		 left join category3 cate3 on zh.category3=cate3.category3 order by zh.sortV limit #{map.start},#{map.end}
+	</select>
+	
+	<insert id="addBatchItemHomeRank">
+	    insert into item_home_rank(itemID,rankID,sortV) values
+	    <foreach collection="array" item="itemID" index="index" separator=",">
+	        (#{itemID}, #{rankID},1)
+	    </foreach>
+  	</insert>
+  	
+  	<delete id="deleteItemHomeRank" parameterType="java.lang.String">
+		delete from item_home_rank where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+  	
+  	<delete id="deleteItemHomeRankByRankId" parameterType="java.lang.String">
+		delete from item_home_rank where rankID = #{rankID}
+	</delete>
+	
+	<update id="updateAdJson">
+		update
+			rank
+		set
+			${field} = #{adJsonStr}
+		where
+			rankID = #{rankID}
+	</update>
+	
+	<delete id="deleteHomeRankByItemID" parameterType="java.lang.String">
+		delete from item_home_rank where itemID in
+		<foreach item="itemID" collection="array" open="(" separator="," close=")">
+			#{itemID}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteCollectionByItemID" parameterType="java.lang.String">
+		delete from item_collection where itemID in
+		<foreach item="itemID" collection="array" open="(" separator="," close=")">
+			#{itemID}
+		</foreach>
+	</delete>
+	
+	
+	<select id="collectionItemCount" resultType="int">
+		select 
+		  count(*)
+		from ( 
+			select 
+			  i.itemID,i.name,i.iconID,i.category2,i.category3,r.sortV,r.colID,r.id 
+			from  
+			  item_collection r,item i where r.itemID=i.itemID and i.status='LIST' and r.colID=#{map.colID} 
+			  <if test="map.itemID!=null and map.itemID!=''">
+			  	and i.itemID = #{map.itemID} 
+			  </if>  
+			  <if test="map.itemName!=null and map.itemName!=''">
+			  	and i.name like #{map.itemName}"%"
+			  </if>
+			  <if test="map.category1!=null and map.category1!=''">
+			  	and i.category1 = #{map.category1} 
+			  </if>
+			  <if test="map.category2!=null and map.category2!=''">
+			  	and i.category2 = #{map.category2} 
+			  </if>  
+		  ) zh 
+		 left join item_soft s on zh.itemID = s.itemID 
+		 left join category3 cate3 on zh.category3=cate3.category3 
+	</select>
+	
+	<select id="collectionItemList" resultType="map">
+		select 
+		  zh.itemID, zh.name, zh.iconID, zh.category2, zh.category3, zh.sortV, zh.colID, zh.id,s.versionCode,cate3.name as cate3Name 
+		from ( 
+			select 
+			  i.itemID,i.name,i.iconID,i.category2,i.category3,r.sortV,r.colID,r.id 
+			from  
+			  item_collection r,item i where r.itemID=i.itemID and i.status='LIST' and r.colID=#{map.colID} 
+			   <if test="map.itemID!=null and map.itemID!=''">
+			  	and i.itemID = #{map.itemID} 
+			  </if>  
+			  <if test="map.itemName!=null and map.itemName!=''">
+			  	and i.name like #{map.itemName}"%"
+			  </if>
+			  <if test="map.category1!=null and map.category1!=''">
+			  	and i.category1 = #{map.category1} 
+			  </if>
+			  <if test="map.category2!=null and map.category2!=''">
+			  	and i.category2 = #{map.category2} 
+			  </if>  
+		  ) zh 
+		 left join item_soft s on zh.itemID = s.itemID 
+		 left join category3 cate3 on zh.category3=cate3.category3 order by zh.sortV limit #{map.start},#{map.end}
+	</select>
+	
+	<select id="getCollectionItemByColId" resultType="java.lang.String">
+		select itemID from item_collection where colID = #{colID}
+	</select>
+	
+	<insert id="addBatchCollectItems">
+	    insert into item_collection(itemID,colID,sortV) values
+	    <foreach collection="array" item="itemID" index="index" separator=",">
+	        (#{itemID}, #{colID},1)
+	    </foreach>
+  	</insert>
+  	
+  	<delete id="deleteCollectionItemByID" parameterType="java.lang.String">
+		delete from item_collection where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	 <delete id="deleteCollectionItemByColId" parameterType="java.lang.String">
+		delete from item_collection where colID = #{colID}
+	</delete>
+	
+</mapper>

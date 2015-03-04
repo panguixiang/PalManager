@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.afmobi.mapper.manager.MessageMapper">
+
+    <select id="sysMsgList" resultType="com.afmobi.model.manager.SysMsg">
+    	select 
+    		m.msgId,m.title,m.content,m.imgID,m.ddate
+    	from 
+    		sys_msg m 
+    	order by m.ddate desc
+    </select>
+    
+    <select id="sysMsgCount" resultType="int">
+    	select count(msgId) from sys_msg
+    </select>
+    
+    <insert id="saveMessage" parameterType="com.afmobi.model.manager.SysMsg" useGeneratedKeys="true" keyProperty="msgId">
+    	insert into 
+    		sys_msg(cmd,title,content,imgID,ddate)
+    	values('CMD_NOTIFY',#{title},#{content},#{imgID},now())
+    </insert>
+    
+    <insert id="batchSaveMsgCountry">
+	    insert into sys_msg_country(msgID,countryCode) values
+	    <foreach collection="array" item="country" index="index" separator=",">
+	        (#{msgID}, #{country})
+	    </foreach>
+  	</insert>
+   
+    <delete id="deleteBatchMessageByMsgId" parameterType="java.lang.String">
+		delete from sys_msg where msgId in
+		<foreach item="msgId" collection="msgIDArray" open="(" separator="," close=")">
+			#{msgId}
+		</foreach>
+	</delete>
+	
+	 <delete id="deleteBatchMessageCountryCodeByMsgId" parameterType="java.lang.String">
+		delete from sys_msg_country where msgID in
+		<foreach item="msgId" collection="msgIDArray" open="(" separator="," close=")">
+			#{msgId}
+		</foreach>
+	</delete>
+	
+	<select id="getSysMsgCountrysByMsgId" resultType="com.afmobi.model.manager.SysMsgCountry">
+		select msgID,countryCode from sys_msg_country where msgID in 
+		<foreach collection="msgIDArray" index="index" item="msgId" open="(" separator="," close=")"> 
+			#{msgId} 
+		</foreach>
+	</select>
+	
+</mapper>
+

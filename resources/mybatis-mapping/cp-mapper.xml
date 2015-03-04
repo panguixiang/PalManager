@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afmobi.mapper.manager.CpMapper">
+
+	<select id="getCpList" resultType="map">
+		select 
+			cpID,account,name,cpType,subSaleRate,status,ddate
+		from 
+			cp  
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="map.account != null and map.account != '' ">
+				and account = #{map.account}
+			</if>
+			<if test="map.status != null and map.status != '' ">
+				and status = #{map.status}
+			</if>
+			<if test="map.name != null and map.name != '' ">
+				and name like #{map.name}"%"
+			</if>
+		</trim>
+		 order by ddate desc 
+	</select>
+	
+	<select id="getCpCount" resultType="int">
+		select 
+			count(cpID)
+		from 
+			cp 
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="map.account != null and map.account != '' ">
+				and account = #{map.account}
+			</if>
+			<if test="map.status != null and map.status != '' ">
+				and status = #{map.status}
+			</if>
+			<if test="map.name != null and map.name != '' ">
+				and name like #{map.name}"%"
+			</if>
+		</trim>
+	</select>
+	
+	<select id="getCpNameList" resultType="map">
+		select 
+			cpID as id,name 
+		from 
+			cp 
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="status != null and status != '' ">
+				and status = #{status}
+			</if>
+		</trim>
+	</select>
+	
+	<select id="cpCountByInSaleId" resultType="int">
+		select 
+			count(cpID) as sum 
+		from 
+			cp 
+		where 
+			cpID = #{inSaleId}
+	</select>
+	
+	
+	<select id="cpInSalePoolById" resultType="java.lang.String">
+		select 
+			inSalePool
+		from 
+			cp 
+		where 
+			cpID = #{cpId}
+	</select>
+	
+	<update id="updateInSalePool">
+		update
+			cp
+		set
+			inSalePool=#{inSalePool}
+		where
+			cpID=#{cpId}		
+	</update>
+	
+	<select id="getCpDetail" resultType="com.afmobi.model.manager.Cp">
+		select 
+			cpID,account,name,cpType,addr,email,phone,inSalePool,inSalePackageID,contacts,subSaleRate,status,unit,des
+		from
+			cp
+		where 
+			cpID = #{cpID} limit 1
+	</select>
+	
+	<insert id="saveCp" parameterType="com.afmobi.model.manager.Cp">
+		insert into 
+			cp(cpID,account,name,pw,cpType,addr,email,phone,inSalePool,contacts,subSaleRate,status,unit,des,ddate)
+		values
+			(#{cp.cpID},#{cp.account},#{cp.name},#{cp.pw},#{cp.cpType},#{cp.addr},#{cp.email},#{cp.phone},#{cp.inSalePool},
+			#{cp.contacts},#{cp.subSaleRate},#{cp.status},#{cp.unit},#{cp.des},now())
+	</insert>
+	
+	<update id="updateCp">
+		update
+			cp
+		set
+			name = #{cp.name},addr=#{cp.addr},email=#{cp.email},phone=#{cp.phone},contacts=#{cp.contacts},
+			subSaleRate=#{cp.subSaleRate},status=#{cp.status},unit=#{cp.unit},des=#{cp.des}
+		where
+			cpID = #{cp.cpID}
+	</update>
+	
+	<delete id="deleteCp">
+		delete from cp where cpID=#{cpID}
+	</delete>
+	
+	<update id="resetCpPasswd">
+		update
+			cp
+		set
+			pw = #{paswd}
+		where
+			cpID = #{cpID}
+	</update>
+	
+	<select id="getCpItemListCount" parameterType="map" resultType="int">
+				select
+					count(*) as sum
+				from
+					item i left join cp c on i.cpID=c.cpID
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="map.itemID != null and map.itemID != '' ">
+				and i.itemID = #{map.itemID}
+			</if>
+			<if test="map.status != null and map.status != '' ">
+				and i.status = ${map.status}
+			</if>
+			<if test="map.name != null and map.name != '' ">
+				and i.name = #{map.name}
+			</if>
+			<if test="map.category1 != null and map.category1 != '' ">
+				and i.category1 = #{map.category1} 
+			</if>
+			<if test="map.category2 != null and map.category2 != '' ">
+				and i.category2 = #{map.category2}
+			</if>
+			<if test="map.cpName != null and map.cpName != '' ">
+				and c.name = #{map.cpName}
+			</if>
+		</trim>
+	</select>
+
+	<select id="getCpItemList" resultType="map">
+		<choose>
+			<when test="map.Soft != null">
+			select ab.*,bb.name as manName from (
+				select
+					i.iconID,i.name,i.itemID,i.category1,i.category2,i.status,
+					s.versionCode,s.versionName,c.name as cpName,c.cpID,i.createDate
+				from
+					item i left join item_soft s on i.itemID = s.itemID
+					left join cp c on i.cpID=c.cpID 
+					<trim prefix="where" prefixOverrides="and|or">
+						<if test="map.itemID != null and map.itemID != '' ">
+							and i.itemID = #{map.itemID}
+						</if>
+						<if test="map.status != null and map.status != '' ">
+							and i.status = ${map.status}
+						</if>
+						<if test="map.name != null and map.name != '' ">
+							and i.name = #{map.name}
+						</if>
+						<if test="map.category1 != null and map.category1 != '' ">
+							and i.category1 = #{map.category1} 
+						</if>
+						<if test="map.category2 != null and map.category2 != '' ">
+							and i.category2 = #{map.category2}
+						</if>
+						<if test="map.cpName != null and map.cpName != '' ">
+							and c.name = #{map.cpName}
+						</if>
+					</trim>
+					) ab
+			left join (
+					select de.itemID,m.name,m.managerID from (
+						select 
+							A.checkID,A.itemID,A.submitManagerID
+  						from 
+  							cp_item_check A inner join 
+  							(select max(checkID) as checkID from cp_item_check group by itemID ) as B on A.checkID=B.checkID) de 
+  						left join manager m on de.submitManagerID=m.managerID) bb
+			on ab.itemID=bb.itemID
+			</when>
+			<otherwise>
+			select ab.*,bb.name as manName from (
+				select
+					i.name,i.itemID,i.iconID,i.category1,i.category2,i.status,
+					c.name as cpName,c.cpID,i.createDate
+				from
+					item i left join cp c on i.cpID=c.cpID 
+					<trim prefix="where" prefixOverrides="and|or">
+						<if test="map.itemID != null and map.itemID != '' ">
+							and i.itemID = #{map.itemID}
+						</if>
+						<if test="map.status != null and map.status != '' ">
+							and i.status = ${map.status}
+						</if>
+						<if test="map.name != null and map.name != '' ">
+							and i.name = #{map.name}
+						</if>
+						<if test="map.category1 != null and map.category1 != '' ">
+							and i.category1 = #{map.category1} 
+						</if>
+						<if test="map.category2 != null and map.category2 != '' ">
+							and i.category2 = #{map.category2}
+						</if>
+						<if test="map.cpName != null and map.cpName != '' ">
+							and c.name = #{map.cpName}
+						</if>
+					</trim>
+					) ab
+			left join (
+					select de.itemID,m.name,m.managerID,de.ddate from (
+						select 
+							A.checkID,A.itemID,A.submitManagerID,A.ddate
+  						from 
+  							cp_item_check A inner join 
+  							(select max(checkID) as checkID from cp_item_check group by itemID ) as B on A.checkID=B.checkID) de 
+  						left join manager m on de.submitManagerID=m.managerID) bb
+			on ab.itemID=bb.itemID
+			</otherwise>
+		</choose>
+			order by bb.ddate desc limit #{map.start},#{map.end}
+	</select>
+	
+	<select id="getCpItemDetailByItemID" resultType="map">
+		select 
+			i.itemID,i.name,i.sourceID,i.category1,i.category2,i.status,i.des,s.versionCode,s.versionName,
+			s.isInSale,c.name as cpName,c.contacts 
+		from 
+			item i left join item_soft s on  i.itemID=s.itemID 
+			left join cp c on i.cpID=c.cpID 
+		where 
+			i.itemID=#{itemID}
+	</select>
+	
+	<select id="cpItemCheckList" resultType="map">
+		select 
+			ch.des,ch.testResultFileID,ch.ddate,m.name
+		from 
+			cp_item_check ch left join manager m on ch.submitManagerID = m.managerID 
+		where 
+			ch.itemID=#{itemID} order by ch.ddate desc
+	</select>
+	
+	<insert id="saveCpItemCheck">
+		insert into 
+			cp_item_check(itemID,submitManagerID,status,testResultFileID,des,ddate)
+		values(
+			#{itemID},#{submitManagerID},#{status},#{testResultFileID},#{des},now()
+		)
+	</insert>
+	
+	</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.afmobi.mapper.manager.ManagerMapper">
+
+	<select id="getManagerList" resultType="map">
+		select 
+			managerID,name,account,role,des,ddate
+		from 
+			manager
+		order by ddate desc 
+		limit
+			#{start},#{end}
+	</select>
+	
+	<select id="getManagerCount" resultType="int">
+		select 
+			count(managerID)
+		from 
+			manager
+	</select>
+	
+	<select id="getManagerByAccount" resultType="map">
+		select 
+			managerID,name,account,role
+		from 
+			manager
+		where
+			account = #{account} and pw=#{password} limit 1
+	</select>
+	
+	<select id="getManagerById" resultType="map">
+		select 
+			managerID,name,account,role,des,ddate
+		from 
+			manager
+		where
+			managerID = #{managerID} limit 1 
+	</select>
+	
+	<insert id="save">
+	    insert into 
+	    	manager(name,account,role,pw,des,ddate) 
+	    values
+	        (#{name}, #{account}, #{role}, #{passwd}, #{des},now())
+  	</insert>
+  	
+	<update id="update">
+           update
+           	  manager 
+           set  
+              name = #{name},role=#{role},des=#{des}
+           where 
+              managerID = #{managerID}
+	</update>
+	
+	<delete id="deleteManagerById" parameterType="java.lang.String">
+		delete from manager where managerID = #{managerID}
+	</delete>
+	
+	<update id="resetPswd">
+           update
+           	  manager 
+           set  
+              pw = #{newPassword}
+           where 
+              managerID = #{managerID}
+	</update>
+	
+	<select id="getCheckItemList" resultType="map">
+		select 
+			i.itemID,i.name,c.name as cpName,c.contacts 
+		from 
+			item i left join cp c on i.cpID=c.cpID 
+		where 
+			i.status = #{status} 
+	</select>
+	
+</mapper>
